@@ -1,0 +1,13 @@
+
+.TaskInfo {
+    position: fixed;
+    margin: 100px auto;
+    background: white;
+    color: black;
+    width: 500px;
+    height: 500px;
+}
+
+.PopupInfo {
+
+}

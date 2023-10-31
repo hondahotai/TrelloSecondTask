@@ -1,0 +1,38 @@
+.Popup {
+    display: none;
+}
+
+.PopupActive {
+    height: 100vh;
+    width: 100vw;
+    background-color: rgba(0,0,0,0.4);
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.PopupContent {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+    border-radius: 12px;
+    background-color: white;
+    color: black;
+    font-size: 20px;
+    font-weight: bold;
+
+}
+
+.PopupInput {
+    padding: 10px;
+    font-size: 20px;
+}
+
+.PopupBtn {
+    padding: 15px;
+}

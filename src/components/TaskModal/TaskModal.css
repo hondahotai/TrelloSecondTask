@@ -1,0 +1,55 @@
+.TaskModal {
+    height: 100vh;
+    width: 100vw;
+    background-color: rgba(0,0,0,0.4);
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.TaskModalContent  {
+    background-color: white;
+    padding: 20px;
+    border-radius: 12px;
+    color: black;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    position: relative;
+}
+
+.ColumnName {
+    font-size: 15px;
+
+}
+
+.CommentTasks {
+    padding: 20px;
+}
+
+.CommentTasks ul {
+    list-style-type: none;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.CommentTasks li {
+    display: flex;
+    gap: 10px;
+}
+
+.closeModalButton {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}

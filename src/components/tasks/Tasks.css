@@ -1,0 +1,45 @@
+.taskWrap {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.tasksList {
+    list-style-type: none;
+    list-style-position: outside;
+    background: black;
+    color: black;
+    font-size: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+
+}
+
+
+
+.task {
+    border: 1px solid black;
+    border-radius: 10px;
+    background: white;
+    padding: 10px;
+    margin: 10px;
+    width: 100%;
+    overflow: hidden;
+    text-align: center;
+}
+
+
+.comments {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 15px;
+    height: 15px;
+}
+
+.comments img {
+    width: 15px;
+    height: 15px;
+}
+
