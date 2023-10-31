@@ -3,7 +3,7 @@ import React from "react";
 import Column from "../columns/Columns";
 import "../columns/Columns.css";
 import { useSelector } from "react-redux";
-import { ColumnData } from "../../state/columns/types";
+import { ColumnData } from "../../state/ducks/columns/types";
 
 const Board = () => {
   const columns = useSelector((state: any) => state.column);

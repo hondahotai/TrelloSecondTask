@@ -1,8 +1,8 @@
 import "./Columns.css";
 import Tasks from "../tasks/Tasks";
 import { useDispatch, useSelector } from "react-redux";
-import { ColumnData } from "../../state/columns/types";
-import { setTitle, toggleEditing } from "../../state/columns/actions";
+import { ColumnData } from "../../state/ducks/columns/types";
+import { setTitle, toggleEditing } from "../../state/ducks/columns/actions";
 
 interface ColumnProps {
   index: number;

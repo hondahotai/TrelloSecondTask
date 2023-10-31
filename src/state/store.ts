@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import columnReducer from "../state/columns/reducers";
+import columnReducer from "../state/ducks/columns/reducers";
 
 export default configureStore({
     reducer: {
