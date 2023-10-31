@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="19c71400-e2e8-45e1-8451-d52a8993ca89" name="Changes" comment="" />
+    <list default="true" id="19c71400-e2e8-45e1-8451-d52a8993ca89" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/src/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.tsx" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -56,7 +58,7 @@
       <option name="presentableId" value="Default" />
       <updated>1698746050280</updated>
       <workItem from="1698746051291" duration="932000" />
-      <workItem from="1698746991000" duration="3461000" />
+      <workItem from="1698746991000" duration="3840000" />
     </task>
     <servers />
   </component>
