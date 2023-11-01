@@ -3,6 +3,7 @@ import Tasks from "../tasks/Tasks";
 import { useDispatch, useSelector } from "react-redux";
 import { ColumnData } from "../../state/ducks/columns/types";
 import { setTitle, toggleEditing } from "../../state/ducks/columns/actions";
+import {useForm} from "react-hook-form";
 
 interface ColumnProps {
   index: number;
@@ -11,30 +12,37 @@ interface ColumnProps {
 const Column = ({ index }: ColumnProps) => {
   const dispatch = useDispatch();
 
+
   const column = useSelector((state: any) =>
       state.column.find((col: ColumnData) => col.id === index),
   );
-  const storedTitle = localStorage.getItem(`column-title-${column.id}`);
-  const currentTitle = column.currentTitle || storedTitle || column.title;
 
-  const handleTitleChange = (e: any) => {
-    const newTitle = e.target.value;
-    dispatch(setTitle({ id: index, title: newTitle }));
+  const currentTitle = column.currentTitle  || column.title;
 
-    localStorage.setItem(`column-title-${column.id}`, newTitle);
+
+  const { register, handleSubmit, reset, formState: { errors } } = useForm({
+    defaultValues: {
+      title: currentTitle
+    }
+  });
+
+  const onSubmit = (data: {title:string}) => {
+    dispatch(setTitle({ id: index, title: data.title }));
+    dispatch(toggleEditing(index));
   };
 
   return (
       <div className="column">
         {column.isEditing ? (
             <div className="wrapper">
-              <input
-                  className="inputHeader"
-                  type="text"
-                  value={currentTitle}
-                  onChange={handleTitleChange}
-                  onBlur={() => dispatch(toggleEditing(index))}
-              />
+              <form onSubmit={handleSubmit(onSubmit)}>
+                <input
+                    className="inputHeader"
+                    {...register("title", { required: true })}
+                    onBlur={handleSubmit(onSubmit)}
+                />
+                {errors.title && <p>поле обязательно</p>}
+              </form>
             </div>
         ) : (
             <div className="wrapper">

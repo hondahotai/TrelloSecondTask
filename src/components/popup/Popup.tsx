@@ -1,7 +1,7 @@
-import React, { useState } from "react";
 import "./Popup.css";
 import {useDispatch} from "react-redux";
 import {addName} from "../../state/ducks/userName/actions";
+import {useForm} from "react-hook-form";
 
 interface IPopup {
   active: boolean;
@@ -10,29 +10,26 @@ interface IPopup {
 
 const Popup = ({ active, onClose }: IPopup) => {
   const dispatch = useDispatch();
-  const [name, setName] = useState("");
+  const { register, handleSubmit, formState: { errors } } = useForm();
 
-  const handleSubmit = () => {
-    dispatch(addName(name))
-    // localStorage.setItem("name", name);
+  const onSubmit = (data:any) => {
+    dispatch(addName(data.name))
     onClose();
   };
 
   return (
     <div className={`Popup ${active ? "PopupActive" : ""}`}>
       <div className="PopupContent">
-        Введите имя:
-        <input
-          className="PopupInput"
-          type="text"
-          value={name}
-          onChange={(e) => {
-            setName(e.target.value);
-          }}
-        />
-        <button onClick={handleSubmit} className="PopupBtn">
-          Сохранить
-        </button>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          Введите имя:
+          <input
+              className="PopupInput"
+              {...register("name", {required: true})}
+          />
+          <button type='submit' className="PopupBtn">
+            Сохранить
+          </button>
+        </form>
       </div>
     </div>
   );
