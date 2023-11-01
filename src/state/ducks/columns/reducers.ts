@@ -20,9 +20,9 @@ const columnReducer = createReducer(initialState, builder => {
         .addCase(setTitle, (state, action) => {
             const column = state.find((col) => col.id === action.payload.id);
             if (column) {
-                column.currentTitle = action.payload.title;
+                column.title = action.payload.title;
             }
-        });
+        })
 });
 
 export default columnReducer;

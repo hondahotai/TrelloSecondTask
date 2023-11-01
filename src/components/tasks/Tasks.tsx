@@ -1,38 +1,50 @@
 import "./Tasks.css";
 import TaskModal from "../TaskModal/TaskModal";
-import React, { useState, useEffect } from "react";
+import {useDispatch, useSelector} from "react-redux";
+import {addTask} from "../../state/ducks/tasks/actions";
+import {useState} from "react";
+import {Task} from "../../state/ducks/tasks/types";
+import {useEffect} from "react";
 
 type TitleColumns = {
-  title: string;
   columnId: number;
 };
 
-const Tasks = ({ columnId, title }: TitleColumns) => {
-  const [tasks, setTasks] = useState<string[]>([]);
-  const [newTask, setNewTask] = useState("");
+const Tasks = ({ columnId}: TitleColumns) => {
 
-  const [openedModalIndex, setOpenedModalIndex] = useState<number | null>(null);
+  const [task, setTask] = useState('');
 
-  const [commentsCounts, setCommentsCounts] = useState<number[]>([]);
-  const setCommentsCount = (index: number, count: number) => {
-    const updatedCounts = [...commentsCounts];
-    updatedCounts[index] = count;
-    setCommentsCounts(updatedCounts);
+  const dispatch = useDispatch();
+  const columnTasks = useSelector((state:any) => state.task.taskByColumn[columnId]);
+  const [openedModalIndex, setOpenedModalIndex] = useState<null | number>();
+
+
+ const addNewTask = () => {
+   if (task) {
+     dispatch(addTask({columnId, task}));
+     setTask('');
+   }
+ }
+
+
+
+
+  const handleCloseModal = () => {
+    setOpenedModalIndex(null);
   };
 
   const handleOpenModal = (index: number) => {
     setOpenedModalIndex(index);
   };
 
-  const handleCloseModal = () => {
-    setOpenedModalIndex(null);
-  };
 
   const handleEscapeKey = (event: KeyboardEvent) => {
     if (event.key === "Escape") {
       handleCloseModal();
     }
   };
+
+
 
   useEffect(() => {
     if (openedModalIndex !== null) {
@@ -41,126 +53,41 @@ const Tasks = ({ columnId, title }: TitleColumns) => {
     return () => {
       document.removeEventListener("keydown", handleEscapeKey);
     };
-  }, [openedModalIndex]);
+  }, [handleEscapeKey, openedModalIndex]);
 
-  function addLocalStorage(key: string, value: string) {
-    const current: string[] = JSON.parse(localStorage.getItem(key) || "[]");
-
-    current.push(value);
-    localStorage.setItem(key, JSON.stringify(current));
-  }
-
-  useEffect(() => {
-    const loadTasksFromLocalStorage = () => {
-      const storedTasks = localStorage.getItem(`column-${columnId}`);
-      if (storedTasks) {
-        setTasks(JSON.parse(storedTasks));
-      }
-
-      const loadedCommentsCounts = storedTasks
-        ? JSON.parse(storedTasks).map((task: string, index: number) => {
-            const storedComments = localStorage.getItem(
-              `comments-${columnId}-${index}`,
-            );
-            return storedComments ? JSON.parse(storedComments).length : 0;
-          })
-        : [];
-
-      setCommentsCounts(loadedCommentsCounts);
-    };
-
-    loadTasksFromLocalStorage();
-  }, [columnId]);
-
-  const addTask = () => {
-    if (newTask) {
-      setTasks([...tasks, newTask]);
-      setNewTask("");
-      addLocalStorage(`column-${columnId}`, newTask);
-    }
-  };
-
-  const deleteTask = (index: number) => {
-    const updatedTasks = [...tasks];
-    updatedTasks.splice(index, 1);
-    setTasks(updatedTasks);
-    localStorage.setItem(`column-${columnId}`, JSON.stringify(updatedTasks));
-
-    localStorage.removeItem(`description-${columnId}-${index}`);
-    localStorage.removeItem(`comments-${columnId}-${index}`);
-
-    for (let i = index + 1; i < tasks.length; i++) {
-      const nextComments = localStorage.getItem(`comments-${columnId}-${i}`);
-      localStorage.setItem(
-        `comments-${columnId}-${i - 1}`,
-        nextComments || "[]",
-      );
-      localStorage.removeItem(`comments-${columnId}-${i}`);
-
-      for (let i = index + 1; i < tasks.length; i++) {
-        const nextDescription = localStorage.getItem(
-          `description-${columnId}-${i}`,
-        );
-        if (nextDescription) {
-          localStorage.setItem(
-            `description-${columnId}-${i - 1}`,
-            nextDescription,
-          );
-          localStorage.removeItem(`description-${columnId}-${i}`);
-        }
-      }
-    }
-
-    const updatedCounts = [...commentsCounts];
-    updatedCounts.splice(index, 1);
-    setCommentsCounts(updatedCounts);
-    handleCloseModal();
-  };
-
-  const updateTaskTitle = (index: number, newTitle: string) => {
-    const updatedTasks = [...tasks];
-    updatedTasks[index] = newTitle;
-    setTasks(updatedTasks);
-    localStorage.setItem(title, JSON.stringify(updatedTasks));
-  };
 
   return (
     <div className="taskWrap">
       <ul className="tasksList">
-        {tasks.map((task, index) => (
+        {columnTasks.map((task:Task, index:number) => (
           <li
             onClick={() => {
-              handleOpenModal(index);
+              handleOpenModal(index)
             }}
             className="task"
             key={index}
           >
             {openedModalIndex === index && (
               <TaskModal
-                task={task}
                 index={index}
-                title={title}
-                deleteTask={deleteTask}
-                setCommentsCount={setCommentsCount}
-                updateTaskTitle={updateTaskTitle}
                 columnId={columnId}
                 handleCloseModal={handleCloseModal}
               />
             )}
-            {task}
+            {task.title}
             <div className="comments">
               <img src="../chatICon.png" alt="chatICon" />
-              <p className="commentsCounts">{commentsCounts[index] || 0}</p>
+              <p className="commentsCounts">{columnTasks[index].commentsCount}</p>
             </div>
           </li>
         ))}
       </ul>
       <input
         type="text"
-        value={newTask}
-        onChange={(e) => setNewTask(e.target.value)}
+        value={task}
+        onChange={(e) => {setTask(e.target.value)}}
       />
-      <button onClick={addTask}>Add Task</button>
+      <button onClick={addNewTask}>Add Task</button>
     </div>
   );
 };

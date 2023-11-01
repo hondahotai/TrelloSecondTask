@@ -43,7 +43,7 @@ const Column = ({ index }: ColumnProps) => {
               </h1>
             </div>
         )}
-        <Tasks columnId={column.id} title={currentTitle} />
+        <Tasks columnId={column.id}/>
       </div>
   );
 };

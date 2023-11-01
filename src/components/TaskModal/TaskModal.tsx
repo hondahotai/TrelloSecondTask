@@ -1,203 +1,137 @@
-import React, { useState, useEffect } from "react";
 import "./TaskModal.css";
+import {useState} from "react";
+import {useDispatch, useSelector} from "react-redux";
+import {
+  addCommentToTask, deleteCard, deleteCommentToTask,
+  deleteDescTitle,
+  editCommentToTask,
+  editDescTitle,
+  editTaskTitle,
+} from "../../state/ducks/tasks/actions";
 
 type TaskModalProps = {
-  task: string;
   index: number;
-  title: string;
-  deleteTask: (index: number) => void;
-  setCommentsCount: (index: number, count: number) => void;
-  updateTaskTitle: (index: number, newTitle: string) => void;
   columnId: number;
   handleCloseModal: () => void;
+
 };
 
-const TaskModal = ({
-  task,
-  index,
-  title,
-  deleteTask,
-  setCommentsCount,
-  updateTaskTitle,
-  columnId,
-  handleCloseModal,
-}: TaskModalProps) => {
-  const taskFromStorage = localStorage.getItem(`column-${columnId}`);
-  const tasksArray = taskFromStorage ? JSON.parse(taskFromStorage) : [];
-  const taskIndex = tasksArray[index];
+const TaskModal = ({ index, columnId, handleCloseModal}: TaskModalProps) => {
+  const dispatch = useDispatch();
+  const columnTask = useSelector((state:any) => state.task.taskByColumn[columnId][index]);
 
-  const [editingTaskTitle, setEditingTaskTitle] = useState<boolean>(false);
-  const [tempTaskTitle, setTempTaskTitle] = useState<string>(task);
+  const [editingTaskTitle, setEditingTaskTitle] = useState(false);
+  const [tempTaskTitle, setTempTaskTitle] = useState(columnTask.title);
 
-  const handleTaskTitleChange = (e: any) => {
-    setTempTaskTitle(e.target.value);
-  };
-
-  const saveTaskTitleToLocalStorage = () => {
-    const updatedTasks = [...tasksArray];
-    updatedTasks[index] = tempTaskTitle;
-    localStorage.setItem(`column-${columnId}`, JSON.stringify(updatedTasks));
-    updateTaskTitle(index, tempTaskTitle);
+  const updateTaskTitle = () => {
+    dispatch(editTaskTitle({title:tempTaskTitle, index, columnId}));
     setEditingTaskTitle(false);
-  };
+  }
 
-  const handleEditTaskTitle = () => {
-    setTempTaskTitle(task);
-    setEditingTaskTitle(true);
-  };
+  const columnTitle = useSelector((state:any) => state.column[columnId-1].title)
 
-  const [description, setDescription] = useState<string>(() => {
-    const descFromStorage = localStorage.getItem(
-      `description-${columnId}-${index}`,
-    );
-    return descFromStorage || "";
-  });
+  const [descriptionIsEditing, setDescriptionIsEditing] = useState(false);
+  const [tempDescTitle, setTempDescTitle] = useState(columnTask.description)
 
-  const [editing, setEditing] = useState(false);
-  const [tempDescription, setTempDescription] = useState("");
+  const updateDescTitle = () => {
+    dispatch(editDescTitle({description: tempDescTitle, index, columnId}))
+    setDescriptionIsEditing(false);
+  }
 
-  const handleDescriptionChange = (e: any) => {
-    setTempDescription(e.target.value);
-  };
+  const deleteDescription = () => {
+    dispatch(deleteDescTitle({index, columnId}))
+  }
 
-  const saveDescriptionToLocalStorage = () => {
-    setDescription(tempDescription);
-    localStorage.setItem(`description-${columnId}-${index}`, tempDescription);
-    setEditing(false);
-  };
-
-  const handleEditDescription = () => {
-    setTempDescription(description);
-    setEditing(true);
-  };
-
-  const handleDeleteDescription = () => {
-    setDescription("");
-    localStorage.removeItem(`description-${columnId}-${index}`);
-  };
-
-  const checkComments = (): string[] => {
-    const storedComments = localStorage.getItem(
-      `comments-${columnId}-${index}`,
-    );
-    return storedComments ? JSON.parse(storedComments) : [];
-  };
-  const [comments, setComments] = useState<string[]>(checkComments);
-
-  const [editingCommentIndex, setEditingCommentIndex] = useState<number | null>(
-    null,
-  );
-  const [tempComment, setTempComment] = useState<string>("");
-
-  const handleCommentChange = (e: any) => {
-    setTempComment(e.target.value);
-  };
+  const comments = columnTask.comments;
+  const [tempComments, setTempComments] = useState('');
+  const [commentIsEditing, setCommentIsEditing] = useState(-1);
+  const [editingComment, setEditingComment] = useState('');
 
   const addComment = () => {
-    if (tempComment.trim() !== "") {
-      setComments([...comments, tempComment]);
-      setTempComment("");
+    if (tempComments) {
+      dispatch(addCommentToTask({comment: tempComments, index, columnId}));
+      setTempComments('');
     }
-  };
+  }
+  const updateComment = () => {
+    dispatch(editCommentToTask({comment:editingComment, index, indexComment:commentIsEditing, columnId}));
+    setEditingComment('');
+    setCommentIsEditing(-1);
+  }
+  const deleteComment = (idx:number) => {
+    dispatch(deleteCommentToTask({index, indexComment:idx, columnId}));
+    setEditingComment('');
+    setCommentIsEditing(-1);
+  }
 
-  const editComment = (idx: number) => {
-    setEditingCommentIndex(idx);
-    setTempEditedComment(comments[idx]);
-  };
+  const handleDeleteCard = () => {
+    handleCloseModal();
+    dispatch(deleteCard({index, columnId}))
+  }
 
-  const saveEditedComment = () => {
-    const updatedComments = [...comments];
-    updatedComments[editingCommentIndex!] = tempEditedComment;
-    setComments(updatedComments);
-    setEditingCommentIndex(null);
-    setTempEditedComment("");
-  };
-
-  const deleteComment = (idx: number) => {
-    const updatedComments = [...comments];
-    updatedComments.splice(idx, 1);
-    setComments(updatedComments);
-  };
-
-  useEffect(() => {
-    localStorage.setItem(
-      `comments-${columnId}-${index}`,
-      JSON.stringify(comments),
-    );
-  }, [comments]);
-
-  useEffect(() => {
-    setCommentsCount(index, comments.length);
-    localStorage.setItem(
-      `comments-${columnId}-${index}`,
-      JSON.stringify(comments),
-    );
-  }, [comments, columnId, index]);
-
-  const [tempEditedComment, setTempEditedComment] = useState<string>("");
 
   return (
     <div className="TaskModal">
       <div className="TaskModalContent">
         <h1>
           {" "}
-          {editingTaskTitle ? (
+          {editingTaskTitle ?  (
             <>
               <input
                 type="text"
                 value={tempTaskTitle}
-                onChange={handleTaskTitleChange}
+                onChange={(e) => {setTempTaskTitle(e.target.value)}}
               />
-              <button onClick={saveTaskTitleToLocalStorage}>Save</button>
+              <button onClick={updateTaskTitle}>Save</button>
               <button onClick={() => setEditingTaskTitle(false)}>Cancel</button>
             </>
           ) : (
             <>
-              {taskIndex}
-              <button onClick={handleEditTaskTitle}>Edit</button>
+              {columnTask.title}
+              <button  onClick={() => setEditingTaskTitle(true)}>Edit</button>
             </>
           )}
         </h1>
-        <div className="ColumnName">в колонке: {title}</div>
+        <div className="ColumnName">в колонке: {columnTitle}</div>
         <div>автор:{localStorage.getItem("name")}</div>
         <div className="description">
           Описание:
-          {editing ? (
+          {descriptionIsEditing ?  (
             <>
               <input
                 type="text"
-                value={tempDescription}
-                onChange={handleDescriptionChange}
+                value={tempDescTitle}
+                onChange={(e) => {setTempDescTitle(e.target.value)}}
               />
-              <button onClick={saveDescriptionToLocalStorage}>Save</button>
+              <button onClick={updateDescTitle}>Save</button>
             </>
           ) : (
             <>
-              <span>{description}</span>
-              <button onClick={handleEditDescription}>Edit</button>
-              <button onClick={handleDeleteDescription}>Delete</button>
+              <span>{columnTask.description}</span>
+              <button onClick={() => setDescriptionIsEditing(true)}>Edit</button>
+              <button onClick={deleteDescription}>Delete</button>
             </>
           )}
         </div>
         <div className="CommentTasks">
           Комментарии:
           <ul>
-            {comments.map((comment, idx) => (
+            {comments.map((comment:string, idx:number) => (
               <li key={idx}>
-                {editingCommentIndex === idx ? (
+                {commentIsEditing === idx ? (
                   <>
                     <input
                       type="text"
-                      value={tempEditedComment}
-                      onChange={(e) => setTempEditedComment(e.target.value)}
+                      value={editingComment}
+                      onChange={(e) => setEditingComment(e.target.value)}
                     />
-                    <button onClick={saveEditedComment}>Save</button>
+                    <button onClick={() => updateComment()}>Save</button>
                   </>
                 ) : (
                   <>
-                    {`${localStorage.getItem("name")}: ${comment}`}
-                    <button onClick={() => editComment(idx)}>Edit</button>
-                    <button onClick={() => deleteComment(idx)}>Delete</button>
+                    {comment}
+                    <button onClick={() => {setCommentIsEditing(idx);setEditingComment(comment)}}>Edit</button>
+                    <button onClick={() => {deleteComment(idx)}}>Delete</button>
                   </>
                 )}
               </li>
@@ -205,27 +139,23 @@ const TaskModal = ({
           </ul>
           <input
             type="text"
-            value={tempComment}
-            onChange={handleCommentChange}
+            value={tempComments}
+            onChange={(e) => {setTempComments(e.target.value)}}
             placeholder="Написать комментарий..."
           />
           <button onClick={addComment}>Add Comment</button>
         </div>
         <button
-          onClick={(e) => {
-            deleteTask(index);
-            handleCloseModal();
-            e.stopPropagation();
-          }}
+onClick={(e) => {handleDeleteCard(); handleCloseModal(); e.stopPropagation();}}
         >
           delete card
         </button>
         <button
-          className="closeModalButton"
-          onClick={(e) => {
-            handleCloseModal();
-            e.stopPropagation();
-          }}
+            className="closeModalButton"
+            onClick={(e) => {
+              handleCloseModal();
+              e.stopPropagation();
+            }}
         >
           X
         </button>
