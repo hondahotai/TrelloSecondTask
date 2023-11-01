@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import "./Popup.css";
+import {useDispatch} from "react-redux";
+import {addName} from "../../state/ducks/userName/actions";
 
 interface IPopup {
   active: boolean;
@@ -7,10 +9,12 @@ interface IPopup {
 }
 
 const Popup = ({ active, onClose }: IPopup) => {
+  const dispatch = useDispatch();
   const [name, setName] = useState("");
 
   const handleSubmit = () => {
-    localStorage.setItem("name", name);
+    dispatch(addName(name))
+    // localStorage.setItem("name", name);
     onClose();
   };
 

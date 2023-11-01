@@ -93,7 +93,7 @@ const TaskModal = ({ index, columnId, handleCloseModal}: TaskModalProps) => {
           )}
         </h1>
         <div className="ColumnName">в колонке: {columnTitle}</div>
-        <div>автор:{localStorage.getItem("name")}</div>
+        <div>автор:{useSelector((state:any) => state.userName.name)}</div>
         <div className="description">
           Описание:
           {descriptionIsEditing ?  (
