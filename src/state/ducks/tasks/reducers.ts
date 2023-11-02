@@ -13,7 +13,6 @@ import {
 } from './actions';
 
 const initialState:TaskData = {
-    isOpen: 0,
     taskByColumn: {
         1: [],
         2: [],
@@ -24,9 +23,6 @@ const initialState:TaskData = {
 
 const taskReducer = createReducer(initialState, builder => {
     builder
-        .addCase(modalIsOpen,(state, action) => {
-
-        })
         .addCase(addTask,(state, action) => {
             const {columnId, task} = action.payload;
             const newTask: Task = {

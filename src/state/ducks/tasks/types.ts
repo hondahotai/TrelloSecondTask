@@ -1,5 +1,4 @@
 export type TaskData = {
-    isOpen: number,
     taskByColumn: {
         [columnId: number]: Task[];
     },
