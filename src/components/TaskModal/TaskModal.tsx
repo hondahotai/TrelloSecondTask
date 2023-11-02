@@ -38,7 +38,6 @@ const TaskModal = ({ index, columnId, handleCloseModal}: TaskModalProps) => {
   const columnTitle = useSelector((state:any) => state.column[columnId-1].title)
 
   const [descriptionIsEditing, setDescriptionIsEditing] = useState(false);
-  const [tempDescTitle, setTempDescTitle] = useState(columnTask.description)
 
   const {register: registerDescription, handleSubmit:handleSubmitDescription} = useForm({
     defaultValues: {
