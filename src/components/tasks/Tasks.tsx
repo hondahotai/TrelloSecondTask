@@ -6,6 +6,8 @@ import {useState} from "react";
 import {Task} from "../../state/ducks/tasks/types";
 import {useEffect} from "react";
 import { useForm } from 'react-hook-form';
+import {create} from "domain";
+import {createPortal} from "react-dom";
 
 type TitleColumns = {
   columnId: number;
@@ -69,11 +71,11 @@ const Tasks = ({ columnId}: TitleColumns) => {
                         key={index}
                     >
                         {openedModalIndex === index && (
-                            <TaskModal
+                            createPortal(<TaskModal
                                 index={index}
                                 columnId={columnId}
                                 handleCloseModal={handleCloseModal}
-                            />
+                            />, document.body)
                         )}
                         {task.title}
                         <div className="comments">

@@ -1,5 +1,6 @@
 import "./TaskModal.css";
 import {useState} from "react";
+import {useForm} from "react-hook-form";
 import {useDispatch, useSelector} from "react-redux";
 import {
   addCommentToTask, deleteCard, deleteCommentToTask,
@@ -20,21 +21,33 @@ const TaskModal = ({ index, columnId, handleCloseModal}: TaskModalProps) => {
   const dispatch = useDispatch();
   const columnTask = useSelector((state:any) => state.task.taskByColumn[columnId][index]);
 
-  const [editingTaskTitle, setEditingTaskTitle] = useState(false);
-  const [tempTaskTitle, setTempTaskTitle] = useState(columnTask.title);
+  const { register, handleSubmit, reset } = useForm({
+    defaultValues: {
+      taskTitle: columnTask.title
+    }
+  });
 
-  const updateTaskTitle = () => {
-    dispatch(editTaskTitle({title:tempTaskTitle, index, columnId}));
+  const [editingTaskTitle, setEditingTaskTitle] = useState(false);
+
+  const onSubmit = (data:any) => {
+    dispatch(editTaskTitle({ title: data.taskTitle, index, columnId }));
     setEditingTaskTitle(false);
-  }
+  };
+
 
   const columnTitle = useSelector((state:any) => state.column[columnId-1].title)
 
   const [descriptionIsEditing, setDescriptionIsEditing] = useState(false);
   const [tempDescTitle, setTempDescTitle] = useState(columnTask.description)
 
-  const updateDescTitle = () => {
-    dispatch(editDescTitle({description: tempDescTitle, index, columnId}))
+  const {register: registerDescription, handleSubmit:handleSubmitDescription} = useForm({
+    defaultValues: {
+      description: columnTask.description
+    }
+  })
+
+  const updateDescTitle = (data:any) => {
+    dispatch(editDescTitle({description: data.description, index, columnId}))
     setDescriptionIsEditing(false);
   }
 
@@ -43,24 +56,23 @@ const TaskModal = ({ index, columnId, handleCloseModal}: TaskModalProps) => {
   }
 
   const comments = columnTask.comments;
-  const [tempComments, setTempComments] = useState('');
   const [commentIsEditing, setCommentIsEditing] = useState(-1);
-  const [editingComment, setEditingComment] = useState('');
 
-  const addComment = () => {
-    if (tempComments) {
-      dispatch(addCommentToTask({comment: tempComments, index, columnId}));
-      setTempComments('');
+  const {register: registerCommentValue, handleSubmit:handleSubmitCommentValue} = useForm();
+  const {register: registerNewComment, handleSubmit:handleSubmitNewComment, reset:resetNewCommentInput} = useForm();
+
+  const addComment = (data:any) => {
+    if (data) {
+      dispatch(addCommentToTask({comment: data.value, index, columnId}));
+      resetNewCommentInput();
     }
   }
-  const updateComment = () => {
-    dispatch(editCommentToTask({comment:editingComment, index, indexComment:commentIsEditing, columnId}));
-    setEditingComment('');
+  const updateComment = (data:any) => {
+    dispatch(editCommentToTask({comment: data.comment, index, indexComment:commentIsEditing, columnId}));
     setCommentIsEditing(-1);
   }
   const deleteComment = (idx:number) => {
     dispatch(deleteCommentToTask({index, indexComment:idx, columnId}));
-    setEditingComment('');
     setCommentIsEditing(-1);
   }
 
@@ -76,15 +88,14 @@ const TaskModal = ({ index, columnId, handleCloseModal}: TaskModalProps) => {
         <h1>
           {" "}
           {editingTaskTitle ?  (
-            <>
+            <form onSubmit={handleSubmit(onSubmit)}>
               <input
                 type="text"
-                value={tempTaskTitle}
-                onChange={(e) => {setTempTaskTitle(e.target.value)}}
+                {...register('taskTitle', {required:true})}
               />
-              <button onClick={updateTaskTitle}>Save</button>
-              <button onClick={() => setEditingTaskTitle(false)}>Cancel</button>
-            </>
+              <button type='submit'>Save</button>
+              <button type='button' onClick={() => { setEditingTaskTitle(false);reset({taskTitle: columnTask.title})}}>Cancel</button>
+            </form>
           ) : (
             <>
               {columnTask.title}
@@ -97,14 +108,13 @@ const TaskModal = ({ index, columnId, handleCloseModal}: TaskModalProps) => {
         <div className="description">
           Описание:
           {descriptionIsEditing ?  (
-            <>
+            <form onSubmit={handleSubmitDescription(updateDescTitle)}>
               <input
                 type="text"
-                value={tempDescTitle}
-                onChange={(e) => {setTempDescTitle(e.target.value)}}
+                {...registerDescription('description', {required: true})}
               />
-              <button onClick={updateDescTitle}>Save</button>
-            </>
+              <button type='submit'>Save</button>
+            </form>
           ) : (
             <>
               <span>{columnTask.description}</span>
@@ -119,31 +129,32 @@ const TaskModal = ({ index, columnId, handleCloseModal}: TaskModalProps) => {
             {comments.map((comment:string, idx:number) => (
               <li key={idx}>
                 {commentIsEditing === idx ? (
-                  <>
+                  <form onSubmit={handleSubmitCommentValue(updateComment)}>
                     <input
                       type="text"
-                      value={editingComment}
-                      onChange={(e) => setEditingComment(e.target.value)}
+                      defaultValue={comment}
+                      {...registerCommentValue('comment', {required:true})}
                     />
-                    <button onClick={() => updateComment()}>Save</button>
-                  </>
+                    <button type='submit'>Save</button>
+                  </form>
                 ) : (
                   <>
                     {comment}
-                    <button onClick={() => {setCommentIsEditing(idx);setEditingComment(comment)}}>Edit</button>
+                    <button onClick={() => {setCommentIsEditing(idx)}}>Edit</button>
                     <button onClick={() => {deleteComment(idx)}}>Delete</button>
                   </>
                 )}
               </li>
             ))}
           </ul>
-          <input
-            type="text"
-            value={tempComments}
-            onChange={(e) => {setTempComments(e.target.value)}}
-            placeholder="Написать комментарий..."
-          />
-          <button onClick={addComment}>Add Comment</button>
+          <form onSubmit={handleSubmitNewComment(addComment)}>
+            <input
+                type="text"
+                {...registerNewComment('value', {required:true})}
+                placeholder="Написать комментарий..."
+            />
+            <button type='submit'>Add Comment</button>
+          </form>
         </div>
         <button
 onClick={(e) => {handleDeleteCard(); handleCloseModal(); e.stopPropagation();}}
