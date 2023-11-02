@@ -1,7 +1,6 @@
 import { createReducer } from '@reduxjs/toolkit';
 import {TaskData, Task} from "./types";
 import {
-    modalIsOpen,
     addTask,
     editTaskTitle,
     editDescTitle,
