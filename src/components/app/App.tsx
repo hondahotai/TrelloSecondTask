@@ -3,14 +3,14 @@ import Board from "../board/Board";
 import Popup from "../popup/Popup";
 import { useEffect, useState } from "react";
 import {useSelector} from "react-redux";
+import {RootState} from "../../state/appState";
 
 const App = () => {
-  const [popupActive, setPopupActive] = useState<boolean>(
-      !useSelector((state:any) => state.userName.name,
-  ));
+  const checkNameInStorage = useSelector((state:RootState) => state.userName.name);
+
+  const [popupActive, setPopupActive] = useState<boolean>(!checkNameInStorage);
 
 
-  const checkNameInStorage = useSelector((state:any) => state.userName.name);
   useEffect(() => {
     if (checkNameInStorage) {
       setPopupActive(false);

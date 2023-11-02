@@ -6,23 +6,27 @@ import {useState} from "react";
 import {Task} from "../../state/ducks/tasks/types";
 import {useEffect} from "react";
 import { useForm } from 'react-hook-form';
-import {create} from "domain";
 import {createPortal} from "react-dom";
+import {RootState} from "../../state/appState";
 
 type TitleColumns = {
   columnId: number;
 };
 
+interface InputTaskTitle {
+    taskTitle: string
+}
+
 const Tasks = ({ columnId}: TitleColumns) => {
 
   const dispatch = useDispatch();
-  const columnTasks = useSelector((state:any) => state.task.taskByColumn[columnId]);
+  const columnTasks = useSelector((state:RootState) => state.task.taskByColumn[columnId]);
   const [openedModalIndex, setOpenedModalIndex] = useState<null | number>();
 
-    const { register, handleSubmit, reset, formState: { errors } } = useForm();
+    const { register, handleSubmit, reset, formState: { errors } } = useForm<InputTaskTitle>();
 
 
-    const onSubmit = (data:any):void => {
+    const onSubmit = (data:InputTaskTitle) => {
         if (data.taskTitle) {
             dispatch(addTask({ columnId, task: data.taskTitle }));
             reset({taskTitle: ''});
@@ -40,22 +44,20 @@ const Tasks = ({ columnId}: TitleColumns) => {
   };
 
 
-  const handleEscapeKey = (event: KeyboardEvent) => {
-    if (event.key === "Escape") {
-      handleCloseModal();
-    }
-  };
-
-
 
   useEffect(() => {
+      const handleEscapeKey = (event: KeyboardEvent) => {
+          if (event.key === "Escape") {
+              handleCloseModal();
+          }
+      };
     if (openedModalIndex !== null) {
       document.addEventListener("keydown", handleEscapeKey);
     }
     return () => {
       document.removeEventListener("keydown", handleEscapeKey);
     };
-  }, [handleEscapeKey, openedModalIndex]);
+  }, [openedModalIndex]);
 
 
   return (

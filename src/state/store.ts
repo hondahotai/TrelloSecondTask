@@ -1,7 +1,6 @@
-import { configureStore, combineReducers } from "@reduxjs/toolkit";
-import columnReducer from "../state/ducks/columns/reducers";
-import taskReducer from "./ducks/tasks/reducers";
-import userNameReducer from "./ducks/userName/reducers";
+import { configureStore } from "@reduxjs/toolkit";
+import rootReducer from "./rootReducer";
+import persistConfig from "./persistConfig";
 
 import { persistStore,
     persistReducer,
@@ -12,20 +11,10 @@ import { persistStore,
     PURGE,
     REGISTER,
 } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
 
-const rootRedicer = combineReducers({
-    column: columnReducer,
-    task: taskReducer,
-    userName: userNameReducer,
-});
 
-const persistConfig = {
-    key: 'root',
-    storage,
-}
 
-const persistedReducer = persistReducer(persistConfig, rootRedicer);
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 const  store = configureStore({
     reducer: persistedReducer,

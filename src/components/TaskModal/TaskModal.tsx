@@ -9,6 +9,7 @@ import {
   editDescTitle,
   editTaskTitle,
 } from "../../state/ducks/tasks/actions";
+import {RootState} from "../../state/appState";
 
 type TaskModalProps = {
   index: number;
@@ -17,11 +18,18 @@ type TaskModalProps = {
 
 };
 
+interface InputForm {
+  taskTitle: string
+  description: string
+  value: string
+  comment: string
+}
+
 const TaskModal = ({ index, columnId, handleCloseModal}: TaskModalProps) => {
   const dispatch = useDispatch();
-  const columnTask = useSelector((state:any) => state.task.taskByColumn[columnId][index]);
+  const columnTask = useSelector((state:RootState) => state.task.taskByColumn[columnId][index]);
 
-  const { register, handleSubmit, reset } = useForm({
+  const { register, handleSubmit, reset } = useForm<InputForm>({
     defaultValues: {
       taskTitle: columnTask.title
     }
@@ -29,23 +37,23 @@ const TaskModal = ({ index, columnId, handleCloseModal}: TaskModalProps) => {
 
   const [editingTaskTitle, setEditingTaskTitle] = useState(false);
 
-  const onSubmit = (data:any) => {
+  const onSubmit = (data:InputForm) => {
     dispatch(editTaskTitle({ title: data.taskTitle, index, columnId }));
     setEditingTaskTitle(false);
   };
 
 
-  const columnTitle = useSelector((state:any) => state.column[columnId-1].title)
+  const columnTitle = useSelector((state:RootState) => state.column[columnId-1].title)
 
   const [descriptionIsEditing, setDescriptionIsEditing] = useState(false);
 
-  const {register: registerDescription, handleSubmit:handleSubmitDescription} = useForm({
+  const {register: registerDescription, handleSubmit:handleSubmitDescription} = useForm<InputForm>({
     defaultValues: {
       description: columnTask.description
     }
   })
 
-  const updateDescTitle = (data:any) => {
+  const updateDescTitle = (data:InputForm) => {
     dispatch(editDescTitle({description: data.description, index, columnId}))
     setDescriptionIsEditing(false);
   }
@@ -57,16 +65,16 @@ const TaskModal = ({ index, columnId, handleCloseModal}: TaskModalProps) => {
   const comments = columnTask.comments;
   const [commentIsEditing, setCommentIsEditing] = useState(-1);
 
-  const {register: registerCommentValue, handleSubmit:handleSubmitCommentValue} = useForm();
-  const {register: registerNewComment, handleSubmit:handleSubmitNewComment, reset:resetNewCommentInput} = useForm();
+  const {register: registerCommentValue, handleSubmit:handleSubmitCommentValue, reset: resetCommentValue} = useForm<InputForm>();
+  const {register: registerNewComment, handleSubmit:handleSubmitNewComment, reset:resetNewCommentInput} = useForm<InputForm>();
 
-  const addComment = (data:any) => {
+  const addComment = (data:InputForm) => {
     if (data) {
       dispatch(addCommentToTask({comment: data.value, index, columnId}));
       resetNewCommentInput();
     }
   }
-  const updateComment = (data:any) => {
+  const updateComment = (data:InputForm) => {
     dispatch(editCommentToTask({comment: data.comment, index, indexComment:commentIsEditing, columnId}));
     setCommentIsEditing(-1);
   }
@@ -80,6 +88,16 @@ const TaskModal = ({ index, columnId, handleCloseModal}: TaskModalProps) => {
     dispatch(deleteCard({index, columnId}))
   }
 
+  const startEditComment = (idx:number, comment:string) => {
+    setCommentIsEditing(idx);
+
+    resetCommentValue({ comment: comment });
+  };
+
+  const cancelEditingTaskTitle = () => {
+    setEditingTaskTitle(false);
+    reset({taskTitle: columnTask.title});
+  }
 
   return (
     <div className="TaskModal">
@@ -93,7 +111,7 @@ const TaskModal = ({ index, columnId, handleCloseModal}: TaskModalProps) => {
                 {...register('taskTitle', {required:true})}
               />
               <button type='submit'>Save</button>
-              <button type='button' onClick={() => { setEditingTaskTitle(false);reset({taskTitle: columnTask.title})}}>Cancel</button>
+              <button type='button' onClick={cancelEditingTaskTitle}>Cancel</button>
             </form>
           ) : (
             <>
@@ -103,7 +121,7 @@ const TaskModal = ({ index, columnId, handleCloseModal}: TaskModalProps) => {
           )}
         </h1>
         <div className="ColumnName">в колонке: {columnTitle}</div>
-        <div>автор:{useSelector((state:any) => state.userName.name)}</div>
+        <div>автор:{useSelector((state:RootState) => state.userName.name)}</div>
         <div className="description">
           Описание:
           {descriptionIsEditing ?  (
@@ -131,7 +149,7 @@ const TaskModal = ({ index, columnId, handleCloseModal}: TaskModalProps) => {
                   <form onSubmit={handleSubmitCommentValue(updateComment)}>
                     <input
                       type="text"
-                      defaultValue={comment}
+                      // defaultValue={comment}
                       {...registerCommentValue('comment', {required:true})}
                     />
                     <button type='submit'>Save</button>
@@ -139,7 +157,7 @@ const TaskModal = ({ index, columnId, handleCloseModal}: TaskModalProps) => {
                 ) : (
                   <>
                     {comment}
-                    <button onClick={() => {setCommentIsEditing(idx)}}>Edit</button>
+                    <button onClick={() => {startEditComment(idx, comment)}}>Edit</button>
                     <button onClick={() => {deleteComment(idx)}}>Delete</button>
                   </>
                 )}
