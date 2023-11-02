@@ -2,10 +2,10 @@ import "./Columns.css";
 import Tasks from "../tasks/Tasks";
 import { useDispatch, useSelector } from "react-redux";
 import { ColumnData } from "../../state/ducks/columns/types";
-import { setTitle, toggleEditing } from "../../state/ducks/columns/actions";
 import {useForm} from "react-hook-form";
 import {RootState} from "../../state/appState";
 import {useState, useEffect} from "react";
+import {toggleEditing, setTitle} from "../../state/ducks/columns/slice";
 
 interface ColumnProps {
   index: number;
